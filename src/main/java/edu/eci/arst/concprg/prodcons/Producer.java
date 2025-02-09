@@ -41,7 +41,7 @@ public class Producer extends Thread {
                 queue.notifyAll(); // notifica al consumidor que hay nuevos elemntos
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
             }
