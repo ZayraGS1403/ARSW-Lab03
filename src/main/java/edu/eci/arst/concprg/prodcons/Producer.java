@@ -10,10 +10,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author hcadavid
- */
 public class Producer extends Thread {
 
     private Queue<Integer> queue = null;
@@ -31,17 +27,24 @@ public class Producer extends Thread {
     @Override
     public void run() {
         while (true) {
-
-            dataSeed = dataSeed + rand.nextInt(100);
-            System.out.println("Producer added " + dataSeed);
-            queue.add(dataSeed);
-            
+            synchronized (queue) {
+                while (queue.size() >= stockLimit) {
+                    try {
+                        queue.wait(); // espera si la cola esta llena
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                dataSeed = rand.nextInt(100);
+                queue.add(dataSeed);
+                System.out.println("Producer added " + dataSeed);
+                queue.notifyAll(); // notifica al consumidor que hay nuevos elemntos
+            }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
     }
 }

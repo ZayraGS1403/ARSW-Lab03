@@ -7,10 +7,7 @@ package edu.eci.arst.concprg.prodcons;
 
 import java.util.Queue;
 
-/**
- *
- * @author hcadavid
- */
+
 public class Consumer extends Thread{
     
     private Queue<Integer> queue;
@@ -23,12 +20,21 @@ public class Consumer extends Thread{
     @Override
     public void run() {
         while (true) {
+            synchronized(queue){
+                while (queue.isEmpty()){
+                    try {
+                        queue.wait(); // espera si la cola este vacia
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                int elem = queue.poll();
+                System.out.println("Consumer consumes " + elem);
+                queue.notifyAll(); // ntifica al productor que hay espacio disponible
 
-            if (queue.size() > 0) {
-                int elem=queue.poll();
-                System.out.println("Consumer consumes "+elem);                                
+
             }
-            
         }
     }
 }
+
