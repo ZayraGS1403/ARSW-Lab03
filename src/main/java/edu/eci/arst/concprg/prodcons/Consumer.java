@@ -32,7 +32,11 @@ public class Consumer extends Thread{
                 System.out.println("Consumer consumes " + elem);
                 queue.notifyAll(); // ntifica al productor que hay espacio disponible
 
-
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
