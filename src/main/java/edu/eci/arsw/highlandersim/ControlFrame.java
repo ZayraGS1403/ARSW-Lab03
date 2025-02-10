@@ -89,7 +89,7 @@ public class ControlFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
 
                 /*
-				 * COMPLETAR
+                 * COMPLETAR
                  */
                 int sum = 0;
                 for (Immortal im : immortals) {
@@ -97,8 +97,8 @@ public class ControlFrame extends JFrame {
                 }
 
                 statisticsLabel.setText("<html>"+immortals.toString()+"<br>Health sum:"+ sum);
-                
-                
+
+
 
             }
         });
@@ -135,8 +135,8 @@ public class ControlFrame extends JFrame {
         output = new JTextArea();
         output.setEditable(false);
         scrollPane.setViewportView(output);
-        
-        
+
+
         statisticsLabel = new JLabel("Immortals total health:");
         contentPane.add(statisticsLabel, BorderLayout.SOUTH);
 
@@ -145,7 +145,7 @@ public class ControlFrame extends JFrame {
     public List<Immortal> setupInmortals() {
 
         ImmortalUpdateReportCallback ucb=new TextAreaUpdateReportCallback(output,scrollPane);
-        
+
         try {
             int ni = Integer.parseInt(numOfImmortals.getText());
 
@@ -173,21 +173,21 @@ class TextAreaUpdateReportCallback implements ImmortalUpdateReportCallback{
     public TextAreaUpdateReportCallback(JTextArea ta,JScrollPane jsp) {
         this.ta = ta;
         this.jsp=jsp;
-    }       
-    
+    }
+
     @Override
     public void processReport(String report) {
         ta.append(report);
 
         //move scrollbar to the bottom
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JScrollBar bar = jsp.getVerticalScrollBar();
-                bar.setValue(bar.getMaximum());
-            }
-        }
+                                                   public void run() {
+                                                       JScrollBar bar = jsp.getVerticalScrollBar();
+                                                       bar.setValue(bar.getMaximum());
+                                                   }
+                                               }
         );
 
     }
-    
+
 }
