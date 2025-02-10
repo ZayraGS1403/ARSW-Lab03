@@ -1,26 +1,25 @@
 package edu.eci.arsw.highlandersim;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
-import java.util.LinkedList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JOptionPane;
-import javax.swing.JToolBar;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import javax.swing.JLabel;
 import javax.swing.JTextField;
-import java.awt.Color;
-import javax.swing.JScrollBar;
+import javax.swing.JToolBar;
+import javax.swing.border.EmptyBorder;
 
 public class ControlFrame extends JFrame {
 
@@ -35,7 +34,6 @@ public class ControlFrame extends JFrame {
     private JLabel statisticsLabel;
     private JScrollPane scrollPane;
     private JTextField numOfImmortals;
-
     /**
      * Launch the application.
      */
@@ -69,15 +67,7 @@ public class ControlFrame extends JFrame {
         final JButton btnStart = new JButton("Start");
         btnStart.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
-                immortals = setupInmortals();
-
-                if (immortals != null) {
-                    for (Immortal im : immortals) {
-                        im.start();
-                    }
-                }
-
+                startExecution();
                 btnStart.setEnabled(false);
 
             }
@@ -87,31 +77,17 @@ public class ControlFrame extends JFrame {
         JButton btnPauseAndCheck = new JButton("Pause and check");
         btnPauseAndCheck.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
-                /*
-                 * COMPLETAR
-                 */
-                int sum = 0;
-                for (Immortal im : immortals) {
-                    sum += im.getHealth();
-                }
-
-                statisticsLabel.setText("<html>"+immortals.toString()+"<br>Health sum:"+ sum);
-
-
-
+                pauseAndCheck();
             }
         });
         toolBar.add(btnPauseAndCheck);
 
         JButton btnResume = new JButton("Resume");
 
-        btnResume.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                /**
-                 * IMPLEMENTAR
-                 */
 
+        btnResume.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e){
+                resumenExecution();
             }
         });
 
@@ -127,7 +103,16 @@ public class ControlFrame extends JFrame {
 
         JButton btnStop = new JButton("STOP");
         btnStop.setForeground(Color.RED);
+
         toolBar.add(btnStop);
+
+        btnStop.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e){
+                output.setText("");
+                stopExecution();
+                btnStart.setEnabled(true);
+            }
+        });
 
         scrollPane = new JScrollPane();
         contentPane.add(scrollPane, BorderLayout.CENTER);
@@ -142,15 +127,56 @@ public class ControlFrame extends JFrame {
 
     }
 
+    private void startExecution(){
+        immortals = setupInmortals();
+        if (immortals != null) {
+            synchronized (immortals) {
+                for (Immortal im : immortals) {
+                    im.start();
+                }
+            }
+        }
+    }
+
+    private void resumenExecution(){
+        synchronized (immortals) {
+            for (Immortal i : immortals) {
+                i.resumeInmortal();
+            }
+
+        }
+    }
+
+    private void pauseAndCheck(){
+        synchronized (immortals) {
+            for(Immortal i: immortals){
+                i.pause();
+            }
+            try {
+                Thread.sleep(immortals.size() / 10);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+            int sum = 0;
+            for (Immortal im : immortals) {
+                sum += im.getHealth();
+            }
+            statisticsLabel.setText("<html>"+immortals.toString()+"<br>Health sum:"+ sum);
+        }
+    }
+
+    private void stopExecution(){
+        pauseAndCheck();
+        immortals.clear();
+    }
+
     public List<Immortal> setupInmortals() {
 
         ImmortalUpdateReportCallback ucb=new TextAreaUpdateReportCallback(output,scrollPane);
 
         try {
             int ni = Integer.parseInt(numOfImmortals.getText());
-
-            List<Immortal> il = new LinkedList<Immortal>();
-
+            List<Immortal> il = Collections.synchronizedList(new ArrayList<Immortal>());
             for (int i = 0; i < ni; i++) {
                 Immortal i1 = new Immortal("im" + i, il, DEFAULT_IMMORTAL_HEALTH, DEFAULT_DAMAGE_VALUE,ucb);
                 il.add(i1);
@@ -181,11 +207,11 @@ class TextAreaUpdateReportCallback implements ImmortalUpdateReportCallback{
 
         //move scrollbar to the bottom
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                                                   public void run() {
-                                                       JScrollBar bar = jsp.getVerticalScrollBar();
-                                                       bar.setValue(bar.getMaximum());
-                                                   }
-                                               }
+               public void run() {
+                   JScrollBar bar = jsp.getVerticalScrollBar();
+                   bar.setValue(bar.getMaximum());
+               }
+           }
         );
 
     }

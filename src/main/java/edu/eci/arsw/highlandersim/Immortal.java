@@ -18,7 +18,7 @@ public class Immortal extends Thread {
     private final Random r = new Random(System.currentTimeMillis());
     boolean pause = false;
     private final Object pauseLock = new Object();
-    private static final Object immortalLock = new Object();
+
 
     public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
         super(name);
