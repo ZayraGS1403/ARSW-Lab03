@@ -1,0 +1,8 @@
+En el entorno de simulación actual, los inmortales se enfrentan en combates continuos hasta que uno de ellos resulta vencido. Al ocurrir esto, se busca retirar al inmortal derrotado de la lista de participantes activos. Sin embargo, este procedimiento puede desencadenar conflictos de concurrencia debido a los siguientes aspectos:
+
+Acceso Concurrente a la Lista: Múltiples hilos pueden intentar alterar la lista simultáneamente, lo que puede causar problemas si un hilo accede a la lista mientras otro está eliminando un elemento. Esto puede resultar en comportamientos impredecibles, como excepciones o daños en la estructura de datos.
+
+Modificaciones Durante la Iteración: Si un hilo está recorriendo la lista mientras otro elimina un inmortal, pueden surgir inconsistencias o fallos en la ejecución del programa.
+
+Conclusión:
+La eliminación de inmortales derrotados en un contexto de ejecución paralela puede generar conflictos si no se gestiona de manera adecuada. Aunque la lista pueda proporcionar ciertas garantías de seguridad en entornos concurrentes, es fundamental coordinar la eliminación de elementos para prevenir errores y mantener la integridad del sistema.
