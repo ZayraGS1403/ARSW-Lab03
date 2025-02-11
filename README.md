@@ -1,99 +1,94 @@
+# Laboratorio Sincronización de Hilos y DeadLocks 03
 
-## Escuela Colombiana de Ingeniería
-### Arquitecturas de Software – ARSW
-
-
-#### Ejercicio – programación concurrente, condiciones de carrera y sincronización de hilos. EJERCICIO INDIVIDUAL O EN PAREJAS.
-
-##### Parte I – Antes de terminar la clase.
-
-Control de hilos con wait/notify. Productor/consumidor.
-
-1. Revise el funcionamiento del programa y ejecútelo. Mientras esto ocurren, ejecute jVisualVM y revise el consumo de CPU del proceso correspondiente. A qué se debe este consumo?, cual es la clase responsable?
-2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.
-3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
+**Integrantes:** Sebastián Cardona, Laura Gil, Zayra Gutiérrez  
+**Profesor:** Javier Toquica Barrera  
+**Universidad:** Escuela Colombiana de Ingeniería Julio Garavito  
 
 
-##### Parte II. – Antes de terminar la clase.
+## Contenido
+1. [Introducción](#introducción)
+2. [Parte I – Control de hilos con wait/notify. Productor/consumidor.](#parte-i--control-de-hilos-con-waitnotify-productorconsumidor)
+3. [Parte II – Sincronización y Dead-Locks.](#parte-ii--sincronización-y-dead-locks)
+4. [Conclusiones](#conclusiones)
 
-Teniendo en cuenta los conceptos vistos de condición de carrera y sincronización, haga una nueva versión -más eficiente- del ejercicio anterior (el buscador de listas negras). En la versión actual, cada hilo se encarga de revisar el host en la totalidad del subconjunto de servidores que le corresponde, de manera que en conjunto se están explorando la totalidad de servidores. Teniendo esto en cuenta, haga que:
+## Introducción
+Este laboratorio aborda la sincronización de hilos en aplicaciones concurrentes, evitando problemas como condiciones de carrera y deadlocks. Se explorará el patrón Productor-Consumidor con `wait()` y `notifyAll()`, y la simulación de batallas en "Highlander Simulator" para analizar bloqueos e inconsistencias. 
 
-- La búsqueda distribuida se detenga (deje de buscar en las listas negras restantes) y retorne la respuesta apenas, en su conjunto, los hilos hayan detectado el número de ocurrencias requerido que determina si un host es confiable o no (_BLACK_LIST_ALARM_COUNT_).
-- Lo anterior, garantizando que no se den condiciones de carrera.
-
-##### Parte III. – Avance para el martes, antes de clase.
-
-Sincronización y Dead-Locks.
-
-![](http://files.explosm.net/comics/Matt/Bummed-forever.png)
-
-1. Revise el programa “highlander-simulator”, dispuesto en el paquete edu.eci.arsw.highlandersim. Este es un juego en el que:
-
-	* Se tienen N jugadores inmortales.
-	* Cada jugador conoce a los N-1 jugador restantes.
-	* Cada jugador, permanentemente, ataca a algún otro inmortal. El que primero ataca le resta M puntos de vida a su contrincante, y aumenta en esta misma cantidad sus propios puntos de vida.
-	* El juego podría nunca tener un único ganador. Lo más probable es que al final sólo queden dos, peleando indefinidamente quitando y sumando puntos de vida.
-
-2. Revise el código e identifique cómo se implemento la funcionalidad antes indicada. Dada la intención del juego, un invariante debería ser que la sumatoria de los puntos de vida de todos los jugadores siempre sea el mismo(claro está, en un instante de tiempo en el que no esté en proceso una operación de incremento/reducción de tiempo). Para este caso, para N jugadores, cual debería ser este valor?.
-
-3. Ejecute la aplicación y verifique cómo funcionan las opción ‘pause and check’. Se cumple el invariante?.
-
-4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
-
-5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
-
-6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
-
-	```java
-	synchronized(locka){
-		synchronized(lockb){
-			…
-		}
-	}
-	```
-
-7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
-
-8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de _Java Concurrency in Practice_).
-
-9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
-
-10. Un elemento molesto para la simulación es que en cierto punto de la misma hay pocos 'inmortales' vivos realizando peleas fallidas con 'inmortales' ya muertos. Es necesario ir suprimiendo los inmortales muertos de la simulación a medida que van muriendo. Para esto:
-	* Analizando el esquema de funcionamiento de la simulación, esto podría crear una condición de carrera? Implemente la funcionalidad, ejecute la simulación y observe qué problema se presenta cuando hay muchos 'inmortales' en la misma. Escriba sus conclusiones al respecto en el archivo RESPUESTAS.txt.
-	* Corrija el problema anterior __SIN hacer uso de sincronización__, pues volver secuencial el acceso a la lista compartida de inmortales haría extremadamente lenta la simulación.
-
-11. Para finalizar, implemente la opción STOP.
-
-<!--
-### Criterios de evaluación
-
-1. Parte I.
-	* Funcional: La simulación de producción/consumidor se ejecuta eficientemente (sin esperas activas).
-
-2. Parte II. (Retomando el laboratorio 1)
-	* Se modificó el ejercicio anterior para que los hilos llevaran conjuntamente (compartido) el número de ocurrencias encontradas, y se finalizaran y retornaran el valor en cuanto dicho número de ocurrencias fuera el esperado.
-	* Se garantiza que no se den condiciones de carrera modificando el acceso concurrente al valor compartido (número de ocurrencias).
+## Desarrollo del Laboratorio
+### Parte I – Control de hilos con wait/notify. Productor/consumidor.
+1. **¿Cómo afecta el consumo de CPU la falta de sincronización en el Productor-Consumidor?**  
+   - El `Consumer` entra en un bucle infinito sin pausas cuando la cola está vacía, lo que incrementa el uso de CPU. Además, el `Producer` agrega elementos sin control, causando un uso excesivo de memoria.
+     ![image](https://github.com/user-attachments/assets/d8c33411-d900-4661-9928-5fa352114a3b)
 
 
-2. Parte III.
-	* Diseño:
-		- Coordinación de hilos:
-			* Para pausar la pelea, se debe lograr que el hilo principal induzca a los otros a que se suspendan a sí mismos. Se debe también tener en cuenta que sólo se debe mostrar la sumatoria de los puntos de vida cuando se asegure que todos los hilos han sido suspendidos.
-			* Si para lo anterior se recorre a todo el conjunto de hilos para ver su estado, se evalúa como R, por ser muy ineficiente.
-			* Si para lo anterior los hilos manipulan un contador concurrentemente, pero lo hacen sin tener en cuenta que el incremento de un contador no es una operación atómica -es decir, que puede causar una condición de carrera- , se evalúa como R. En este caso se debería sincronizar el acceso, o usar tipos atómicos como AtomicInteger).
+2. **¿Cómo optimizar el uso de CPU implementando `wait()` y `notifyAll()`?**  
+   - Implementando `wait()` para que el consumidor espere cuando la cola esté vacía y `notifyAll()` para avisar cuando haya cambios. Esto reduce el uso de CPU y mejora la eficiencia del sistema.
+     ![image](https://github.com/user-attachments/assets/0ddeb87d-d3ed-48ca-907e-7ec2bf299789)
 
-		- Consistencia ante la concurrencia
-			* Para garantizar la consistencia en la pelea entre dos inmortales, se debe sincronizar el acceso a cualquier otra pelea que involucre a uno, al otro, o a los dos simultáneamente:
-			* En los bloques anidados de sincronización requeridos para lo anterior, se debe garantizar que si los mismos locks son usados en dos peleas simultánemante, éstos será usados en el mismo orden para evitar deadlocks.
-			* En caso de sincronizar el acceso a la pelea con un LOCK común, se evaluará como M, pues esto hace secuencial todas las peleas.
-			* La lista de inmortales debe reducirse en la medida que éstos mueran, pero esta operación debe realizarse SIN sincronización, sino haciendo uso de una colección concurrente (no bloqueante).
+
+3. **¿Cómo garantizar un límite de stock en la cola sin alto consumo de CPU?**  
+   - Se estableció un `stockLimit` para que el productor espere cuando la cola esté llena y el consumidor la vacíe. Se utilizó una colección que respete el límite, manteniendo el consumo de CPU bajo.
+     ![image](https://github.com/user-attachments/assets/7ba003f2-a4e6-4e09-8b15-14abef1fad25)
+
+
+### Parte II – Sincronización y Dead-Locks.
+1. **¿Cómo se implementa la pelea entre inmortales en `highlander-simulator`?**  
+   - Cada jugador ataca a otro, reduciendo su salud y aumentando la propia. El juego puede volverse infinito si quedan solo dos inmortales.
+
+2. **¿Se cumple el invariante de salud de los jugadores?**  
+   - No, la suma de salud de todos los jugadores varía debido a condiciones de carrera.
+
+3. **Ejecute la aplicación y verifique cómo funcionan las opciones ‘pause and check’. ¿Se cumple el invariante??**  
+   - No, no se cumple la invariante, en varios casos se ve que la invariante es menor o es mayor a la que debería ser.
+     
+     ![image](https://github.com/user-attachments/assets/e4c69581-6a90-4350-b4a6-b4dba52a40ff)
+
+5. **Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). ¿Se cumple o no el invariante?**
+   
+   La invariante se cumple
+   ![image](https://github.com/user-attachments/assets/58c47735-ba54-411b-9fcc-7d5195edd644)
+
+7. **¿Cómo implementar una estrategia de bloqueo para evitar inconsistencias en `fight()`?**  
+   - Se usó `synchronized` anidado con un orden fijo en la adquisición de bloqueos para evitar interbloqueos.
+
+8. **¿Cómo identificar y corregir un interbloqueo usando `jps` y `jstack`?**  
+   - Se identificó que varios hilos estaban en `waiting for monitor entry`, indicando un deadlock. Se corrigió asegurando un orden de adquisición de bloqueos.
+     ![image](https://github.com/user-attachments/assets/237fcf9b-dcea-4857-9699-b8ce2660836b)
+     ![image](https://github.com/user-attachments/assets/f954345c-8d17-45a3-8743-d267630e963a)
+
+     
+9. **Plantee una estrategia para corregir el problema**
+   
+   Se estableció un orden consistente de adquisición de bloqueos, asegurando que siempre se adquieran en el mismo orden basado en el nombre del hilo, tambien
+se añadió un mecanismo para pausar y reanudar los hilos de forma segura mediante wait() y notifyAll(). Esto evita interrumpir los hilos abruptamente y permite un control más estable de la ejecución. Por último, se implementó pauseLock.wait() para suspender los hilos de forma segura y notifyAll() para reanudarlos.
+Para evitar condiciones de carrera, se usó una lista sincronizada con Collections.synchronizedList(), y se protegió el acceso a la lista con synchronized.
+
+10. **rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante**  
+
+N=100
+	![image](https://github.com/user-attachments/assets/a6042a72-332a-4fe1-be25-846e6df5ef1e)
+
+Efectivamente la invariante se cumplió.
+
+N=1000
+	![image](https://github.com/user-attachments/assets/eaca6463-b03f-4791-a90b-ab1e54f68d7a)
+
+De igual forma la invariante se cumple.
+
+N=10000
+	![image](https://github.com/user-attachments/assets/aa42ea48-dfb1-447b-9f86-9bb7f1ca78d1)
+
+También se cumple la invariante para este caso.
+
+
+11. **¿Cómo implementar la opción `STOP`?**  
+   - Se agregó un mecanismo para detener y reiniciar la simulación sin afectar la estabilidad del sistema.
+     ![image](https://github.com/user-attachments/assets/39b32f1b-07aa-44b6-9446-b179115cd353)
+     ![image](https://github.com/user-attachments/assets/34fcedd3-d049-4405-9dad-6054914004c3)
 
 	
 
-	* Funcionalidad:
-		* Se cumple con el invariante al usar la aplicación con 10, 100 o 1000 hilos.
-		* La aplicación puede reanudar y finalizar(stop) su ejecución.
-		
-		-->
-
-<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />Este contenido hace parte del curso Arquitecturas de Software del programa de Ingeniería de Sistemas de la Escuela Colombiana de Ingeniería, y está licenciado como <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
+## Conclusiones
+- La sincronización adecuada mejora el rendimiento y evita el uso innecesario de CPU y memoria.
+- La falta de control en la concurrencia genera inconsistencias en los datos compartidos.
+- Un orden seguro en la adquisición de bloqueos es clave para evitar deadlocks.
